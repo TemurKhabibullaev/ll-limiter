@@ -42,7 +42,7 @@ func main() {
 	mux.HandleFunc("/v1/allow", srv.HandleAllow)
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("ok")) })
 
-	addr := ":" + strconv.FormatInt(port, 10)
+	addr := "0.0.0.0:" + strconv.FormatInt(port, 10)
 	log.Printf("ll-limiter listening on %s (rate=%.2f burst=%d)", addr, rate, burst)
 	log.Fatal(http.ListenAndServe(addr, mux))
 }
