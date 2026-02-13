@@ -1,0 +1,19 @@
+{
+  "name": "ll-limiter",
+  "image": "mcr.microsoft.com/devcontainers/go:1.22",
+  "features": {},
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.Go",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "go.toolsManagement.autoUpdate": true,
+        "go.useLanguageServer": true
+      }
+    }
+  },
+  "forwardPorts": [8080],
+  "postCreateCommand": "go mod tidy"
+}
