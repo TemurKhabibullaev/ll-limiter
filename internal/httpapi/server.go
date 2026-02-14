@@ -7,10 +7,12 @@ import (
 	"time"
 
 	"github.com/TemurKhabibullaev/ll-limiter/internal/limiter"
+	"github.com/TemurKhabibullaev/ll-limiter/internal/metrics"
 )
 
 type Server struct {
 	L limiter.Limiter
+	M *metrics.Metrics
 }
 
 type resp struct {
@@ -21,6 +23,10 @@ type resp struct {
 }
 
 func (s Server) HandleAllow(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	s.M.InFlight.Inc()
+	defer s.M.InFlight.Dec()
+
 	key := r.URL.Query().Get("key")
 	if key == "" {
 		http.Error(w, "missing key", http.StatusBadRequest)
@@ -35,6 +41,14 @@ func (s Server) HandleAllow(w http.ResponseWriter, r *http.Request) {
 	}
 
 	d := s.L.Allow(key, cost)
+	alg := d.Algorithm
+	s.M.RequestsTotal.WithLabelValues(alg).Inc()
+	s.M.RequestDuration.WithLabelValues(alg).Observe(time.Since(start).Seconds())
+	if d.Allowed {
+		s.M.AllowedTotal.WithLabelValues(alg).Inc()
+	} else {
+		s.M.RejectedTotal.WithLabelValues(alg).Inc()
+	}
 
 	if !d.Allowed && d.RetryAfter > 0 {
 		w.Header().Set("Retry-After", strconv.FormatInt(int64(d.RetryAfter.Seconds()), 10))
