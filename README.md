@@ -1,58 +1,51 @@
-ll-limiter
+# ll-limiter
 
-A low-latency token bucket rate limiter service written in Go.
+Low-latency token bucket rate limiter service written in Go.
 
-Built as a systems and SRE-focused lab project to explore:
+Built as a production systems imitation and SRE-focused lab project to explore:
 
-* concurrency design
+- Concurrency design
+- Low-latency HTTP services
+- Observability and metrics
+- Production-style API behavior
 
-* request-level observability
+---
 
-* low-latency HTTP services
+## 🚀 Features
 
-* production-style metrics instrumentation
+- Token Bucket rate limiting
+- Per-key isolation
+- HTTP API
+- Health endpoint (`/healthz`)
+- Prometheus metrics (`/metrics`)
+- Environment-based configuration
+- Concurrency-safe implementation
 
-🚀 Features
+---
 
-Token Bucket rate limiting
+## 📐 Architecture Overview
 
-Per-key isolation
-
-HTTP API
-
-Health endpoint (/healthz)
-
-Prometheus metrics (/metrics)
-
-Configurable via environment variables
-
-Concurrency-safe implementation
-
-📐 Architecture Overview
-Client
-   ↓
-HTTP API (net/http)
-   ↓
-Token Bucket (in-memory)
-   ↓
-Decision (Allowed / Rejected)
-   ↓
-Prometheus Metrics
+Client --> HTTP API (net/http) --> Token Bucket (in-memory) --> Decision (Allowed / Rejected) --> Prometheus Metrics
 
 
-Single-process, in-memory design optimized for simplicity and low latency.
+Single-process, in-memory architecture optimized for simplicity and low latency.
 
-📡 API
-GET /v1/allow
+---
+
+## 📡 API
+
+### GET `/v1/allow`
 
 Query parameters:
 
-Parameter	Required	Default
-key	Yes	—
-cost	No	1
+| Parameter | Required | Default |
+|-----------|----------|----------|
+| key       | Yes      | —        |
+| cost      | No       | 1        |
 
 Example:
 
+```bash
 curl "http://127.0.0.1:8080/v1/allow?key=user1&cost=1"
 
 
@@ -66,54 +59,44 @@ Response:
 }
 
 GET /healthz
-
 Returns:
-
 ok
-
 
 Used for liveness checks.
 
 GET /metrics
-
 Exposes Prometheus metrics including:
-
 request counters
-
 allowed/rejected counters
-
 latency histogram
-
 in-flight requests
-
 Go runtime metrics
+
 
 ⚙️ Configuration
 
 Environment variables:
 
-Variable	Default	Description
-RATE_PER_SEC	50	Token refill rate
-BURST	100	Maximum bucket size
-PORT	8080	HTTP port
+| Variable     | Default | Description         |
+| ------------ | ------- | ------------------- |
+| RATE_PER_SEC | 50      | Token refill rate   |
+| BURST        | 100     | Maximum bucket size |
+| PORT         | 8080    | HTTP port           |
 
 Example:
 
 RATE_PER_SEC=100 BURST=200 make run
 
+
 🧠 Design Principles
 
-O(1) decision per request
+* O(1) decision per request
+* Lock-protected token bucket
+* Lazy expiration for unused keys
+* No background cleanup goroutines
+* Deterministic behavior
+* Metrics-first design
 
-Lock-protected token bucket
-
-Lazy expiration for unused keys
-
-No background cleanup goroutines
-
-Deterministic behavior
-
-Metrics-first design
 
 📊 Observability
 
@@ -128,36 +111,27 @@ ll_limiter_in_flight
 
 Designed to be scrape-ready in real monitoring systems.
 
+
 🧪 Local Development
 
 Start server:
-
 make run
 
-
 Test:
-
 curl http://127.0.0.1:8080/healthz
 curl http://127.0.0.1:8080/v1/allow?key=test
 curl http://127.0.0.1:8080/metrics
 
+
 🔮 Future Enhancements
 
 Sliding window implementation
-
 Redis-backed distributed limiter
-
 Sharded bucket map to reduce lock contention
-
 Benchmark suite
-
 Dockerfile
-
 Kubernetes deployment example
 
-Save.
-
-Commit:
 
 git add README.md
 git commit -m "add professional project documentation"
