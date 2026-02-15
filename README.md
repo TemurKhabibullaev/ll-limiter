@@ -166,4 +166,5 @@ git push
 ## 📚 Documentation
 - [Architecture](docs/ARCHITECTURE.md)
 - [Design Decisions](docs/DESIGN.md)
+- [Benchmarks](docs/BENCHMARKS.md)
 
