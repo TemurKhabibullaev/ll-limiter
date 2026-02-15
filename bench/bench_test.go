@@ -1,0 +1,48 @@
+package bench
+
+import (
+	"strconv"
+	"testing"
+	"time"
+
+	"github.com/TemurKhabibullaev/ll-limiter/internal/clock"
+	"github.com/TemurKhabibullaev/ll-limiter/internal/limiter"
+)
+
+func BenchmarkTokenBucket_Allow_Cost1(b *testing.B) {
+	tb := limiter.NewTokenBucket(clock.RealClock{}, 50, 100, 10*time.Minute)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		_ = tb.Allow("bench-key", 1)
+	}
+}
+
+func BenchmarkTokenBucket_Allow_ManyKeys(b *testing.B) {
+	tb := limiter.NewTokenBucket(clock.RealClock{}, 50, 100, 10*time.Minute)
+
+	keys := make([]string, 1024)
+	for i := range keys {
+		keys[i] = "bench-key-" + strconv.Itoa(i)
+	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		_ = tb.Allow(keys[i%len(keys)], 1)
+	}
+}
+
+func BenchmarkTokenBucket_Allow_Cost10(b *testing.B) {
+	tb := limiter.NewTokenBucket(clock.RealClock{}, 50, 100, 10*time.Minute)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		_ = tb.Allow("bench-key", 10)
+	}
+}
