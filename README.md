@@ -33,7 +33,6 @@ Single-process, in-memory architecture optimized for simplicity and low latency.
 ---
 
 ## 📡 API
-
 ### GET `/v1/allow`
 
 Query parameters:
@@ -74,7 +73,6 @@ Go runtime metrics
 
 
 ⚙️ Configuration
-
 Environment variables:
 
 | Variable     | Default | Description         |
@@ -87,9 +85,9 @@ Example:
 
 RATE_PER_SEC=100 BURST=200 make run
 
+---
 
 🧠 Design Principles
-
 * O(1) decision per request
 * Lock-protected token bucket
 * Lazy expiration for unused keys
@@ -97,9 +95,9 @@ RATE_PER_SEC=100 BURST=200 make run
 * Deterministic behavior
 * Metrics-first design
 
+---
 
 📊 Observability
-
 Example metrics:
 
 ll_limiter_requests_total
@@ -111,9 +109,9 @@ ll_limiter_in_flight
 
 Designed to be scrape-ready in real monitoring systems.
 
+---
 
 🧪 Local Development
-
 Start server:
 make run
 
@@ -122,9 +120,9 @@ curl http://127.0.0.1:8080/healthz
 curl http://127.0.0.1:8080/v1/allow?key=test
 curl http://127.0.0.1:8080/metrics
 
+---
 
 🔮 Future Enhancements
-
 Sliding window implementation
 Redis-backed distributed limiter
 Sharded bucket map to reduce lock contention
@@ -136,3 +134,10 @@ Kubernetes deployment example
 git add README.md
 git commit -m "add professional project documentation"
 git push
+
+---
+
+## 📚 Documentation
+- [Architecture](docs/ARCHITECTURE.md)
+- [Design Decisions](docs/DESIGN.md)
+
