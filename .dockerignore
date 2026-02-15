@@ -1,0 +1,9 @@
+.git
+.github
+.vscode
+devcontainer
+**/*_test.go
+bench/
+docs/
+*.md
+.DS_Store
