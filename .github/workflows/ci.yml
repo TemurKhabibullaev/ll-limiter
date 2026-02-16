@@ -18,8 +18,9 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
-          cache: true
+          go-version-file: '1.24'
+          check-latest: true
+          cache: false
 
       - name: Go fmt (verify)
         run: |
