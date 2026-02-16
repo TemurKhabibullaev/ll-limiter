@@ -172,15 +172,14 @@ Docker image uses:
 
 ---
 
-## 🔮 Future Enhancements
+## 🔮 Roadmap
 
-Planned roadmap (ordered roughly by impact):
+Planned enhancements:
 
-- **Second algorithm:** Sliding Window limiter (compare behavior vs token bucket under bursty traffic)
-- **Concurrency scaling:** Sharded bucket map / lock striping to reduce contention under high parallelism
-- **Distributed mode:** Redis-backed limiter backend (multi-instance coordination + consistent enforcement)
-- **Kubernetes example:** Helm/Kustomize + Deployment/Service + Prometheus scrape annotations
-- **Hardening:** TTL eviction for inactive keys, max-key guardrails, structured logging, request IDs
+- Sliding Window algorithm (behavior comparison vs token bucket)
+- Sharded bucket map to reduce lock contention under high concurrency
+- Redis-backed distributed limiter
+- Kubernetes deployment example
 
 ---
 
