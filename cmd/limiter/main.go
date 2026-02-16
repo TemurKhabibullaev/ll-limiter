@@ -37,9 +37,28 @@ func main() {
 	burst := getenvInt64("BURST", 100)
 	port := getenvInt64("PORT", 8080)
 
-	tb := limiter.NewTokenBucket(clock.RealClock{}, rate, burst, 10*time.Minute)
+	algo := os.Getenv("ALGORITHM")
+	if algo == "" {
+		algo = "token_bucket"
+	}
+
+	var L limiter.Limiter
+
+	switch algo {
+	case "sliding_window":
+		windowMs := getenvInt64("WINDOW_MS", 1000)
+		window := time.Duration(windowMs) * time.Millisecond
+		// Sliding window: allow up to BURST events per window.
+		L = limiter.NewSlidingWindow(time.Now, burst, window)
+	case "token_bucket":
+		fallthrough
+	default:
+		L = limiter.NewTokenBucket(clock.RealClock{}, rate, burst, 10*time.Minute)
+	}
+
 	m := metrics.New()
-	srv := httpapi.Server{L: tb, M: m}
+	srv := httpapi.Server{L: L, M: m}
+
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/allow", srv.HandleAllow)
