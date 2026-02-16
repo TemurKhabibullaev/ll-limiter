@@ -46,3 +46,30 @@ func BenchmarkTokenBucket_Allow_Cost10(b *testing.B) {
 		_ = tb.Allow("bench-key", 10)
 	}
 }
+
+func BenchmarkSlidingWindow_Allow_Cost1(b *testing.B) {
+	sw := limiter.NewSlidingWindow(time.Now, 100, 1*time.Second)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		_ = sw.Allow("bench-key", 1)
+	}
+}
+
+func BenchmarkSlidingWindow_Allow_ManyKeys(b *testing.B) {
+	sw := limiter.NewSlidingWindow(time.Now, 100, 1*time.Second)
+
+	keys := make([]string, 1024)
+	for i := range keys {
+		keys[i] = "bench-key-" + strconv.Itoa(i)
+	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		_ = sw.Allow(keys[i%len(keys)], 1)
+	}
+}
