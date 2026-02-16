@@ -79,15 +79,55 @@ Go runtime metrics
 ## ⚙️ Configuration
 Environment variables:
 
-| Variable     | Default | Description         |
-| ------------ | ------- | ------------------- |
-| RATE_PER_SEC | 50      | Token refill rate   |
-| BURST        | 100     | Maximum bucket size |
-| PORT         | 8080    | HTTP port           |
+| Variable     | Default      | Description                         |
+| ------------ | ------------ | ----------------------------------- |
+| RATE_PER_SEC | 50           | Token refill rate                   |
+| BURST        | 100          | Maximum bucket size / window limit  |
+| PORT         | 8080         | HTTP port                           |
+| ALGORITHM    | token_bucket | `token_bucket` or `sliding_window`  |
+| WINDOW_MS    | 1000         | Sliding window size in ms (sliding window only) |
+
 
 Example:
 
 RATE_PER_SEC=100 BURST=200 make run
+
+## Sliding Window example (10 requests per 1 second window):
+
+```bash
+ALGORITHM=sliding_window WINDOW_MS=1000 BURST=10 make run
+
+## 🧮 Algorithms
+
+This service supports multiple rate-limiting algorithms via `ALGORITHM`.
+
+| Algorithm | Best for | Behavior |
+|-----------|----------|----------|
+| `token_bucket` | smoothing bursts | tokens refill continuously; allows short bursts up to `BURST` |
+| `sliding_window` | strict per-window enforcement | enforces max `BURST` events per `WINDOW_MS`; returns accurate `retry_after_ms` |
+
+Quick sliding-window check:
+
+BASE="http://127.0.0.1:8080"
+for i in $(seq 1 15); do curl -s "$BASE/v1/allow?key=x" ; echo; done
+
+Response:
+
+{"allowed":true,"remaining":9,"retry_after_ms":0,"algorithm":"sliding_window"}
+{"allowed":true,"remaining":8,"retry_after_ms":0,"algorithm":"sliding_window"}
+{"allowed":true,"remaining":7,"retry_after_ms":0,"algorithm":"sliding_window"}
+{"allowed":true,"remaining":6,"retry_after_ms":0,"algorithm":"sliding_window"}
+{"allowed":true,"remaining":5,"retry_after_ms":0,"algorithm":"sliding_window"}
+{"allowed":true,"remaining":4,"retry_after_ms":0,"algorithm":"sliding_window"}
+{"allowed":true,"remaining":3,"retry_after_ms":0,"algorithm":"sliding_window"}
+{"allowed":true,"remaining":2,"retry_after_ms":0,"algorithm":"sliding_window"}
+{"allowed":true,"remaining":1,"retry_after_ms":0,"algorithm":"sliding_window"}
+{"allowed":true,"remaining":0,"retry_after_ms":0,"algorithm":"sliding_window"}
+{"allowed":false,"remaining":0,"retry_after_ms":911,"algorithm":"sliding_window"}
+{"allowed":false,"remaining":0,"retry_after_ms":900,"algorithm":"sliding_window"}
+{"allowed":false,"remaining":0,"retry_after_ms":889,"algorithm":"sliding_window"}
+{"allowed":false,"remaining":0,"retry_after_ms":879,"algorithm":"sliding_window"}
+{"allowed":false,"remaining":0,"retry_after_ms":869,"algorithm":"sliding_window"}
 
 ---
 
@@ -179,7 +219,6 @@ Docker image uses:
 
 Planned enhancements:
 
-- Sliding Window algorithm (behavior comparison vs token bucket)
 - Sharded bucket map to reduce lock contention under high concurrency
 - Redis-backed distributed limiter
 - Kubernetes deployment example
