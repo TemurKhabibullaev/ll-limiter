@@ -1,5 +1,9 @@
 # ll-limiter
 
+[![ci](https://github.com/TemurKhabibullaev/ll-limiter/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/TemurKhabibullaev/ll-limiter/actions/workflows/ci.yml)
+![Go Version](https://img.shields.io/badge/go-1.24-blue)
+![Docker](https://img.shields.io/badge/docker-ready-blue)
+
 Low-latency token bucket rate limiter service written in Go.
 
 Built as a production systems imitation and SRE-focused lab project to explore:
