@@ -33,20 +33,20 @@ Single-process, in-memory architecture optimized for simplicity and low latency.
 ---
 
 ## 📡 API
-### GET `/v1/allow`
 
-Query parameters:
+### `GET /v1/allow`
+
+**Query parameters:**
 
 | Parameter | Required | Default |
 |-----------|----------|----------|
 | key       | Yes      | —        |
 | cost      | No       | 1        |
 
-Example:
+**Example:**
 
 ```bash
 curl "http://127.0.0.1:8080/v1/allow?key=user1&cost=1"
-
 
 Response:
 
@@ -72,7 +72,7 @@ in-flight requests
 Go runtime metrics
 
 
-⚙️ Configuration
+## ⚙️ Configuration
 Environment variables:
 
 | Variable     | Default | Description         |
@@ -140,26 +140,47 @@ Content-Length: 78
 # Metrics
 curl -i "$BASE/metrics" | head -n 20
 
-Response:
-% Total % Received % Xferd Average Speed Time Time Time Current
-Dload Upload Total Spent Left Speed 0 0 0 0 0 0 0 0 --:--:-- --:--:-- --:--:--
-0HTTP/1.1 200 OK Content-Type: text/plain; version=0.0.4; charset=utf-8; escaping=underscores Date: Sun, 15 Feb 2026 19:36:10 GMT Transfer-Encoding: chunked # HELP go_gc_duration_seconds A summary of the wall-time pause (stop-the-world) duration in garbage collection cycles. # TYPE go_gc_duration_seconds summary go_gc_duration_seconds{quantile="0"} 0 go_gc_duration_seconds{quantile="0.25"} 0 go_gc_duration_seconds{quantile="0.5"} 0 go_gc_duration_seconds{quantile="0.75"} 0 go_gc_duration_seconds{quantile="1"} 0 go_gc_duration_seconds_sum 0 go_gc_duration_seconds_count 0 # HELP go_gc_gogc_percent Heap size target percentage configured by the user, otherwise 100. This value is set by the GOGC environment variable, and the runtime/debug.SetGCPercent function. Sourced from /gc/gogc:percent. # TYPE go_gc_gogc_percent gauge go_gc_gogc_percent 100 # HELP go_gc_gomemlimit_bytes Go runtime memory limit configured by the user, otherwise math.MaxInt64. This value is set by the GOMEMLIMIT environment variablehe runtime/debug.SetMemoryLimit function. Sourced from /gc/gomemlimit:bytes. 10# TYPE go_gc_gomemlimit_bytes gauge go_gc_gomemlimit_bytes 9.223372036854776e+18 0 10215 0 10215 0 0 4775k 0 --:--:-- --:--:-- --:--:-- 4987k
+---
 
+## 🐳 Run with Docker
+
+### Build image
+
+```bash
+docker build -t ll-limiter:local .
+
+Run Container
+
+docker run --rm \
+  -p 8080:8080 \
+  -e RATE_PER_SEC=50 \
+  -e BURST=100 \
+  ll-limiter:local
+
+Verify Endpoints
+
+curl -i http://127.0.0.1:8080/healthz
+curl -i "http://127.0.0.1:8080/v1/allow?key=docker"
+curl -i http://127.0.0.1:8080/metrics | head -n 20
+
+Docker image uses:
+
+* Multi-stage build
+* Distroless runtime image
+* Non-root user
+* Minimal attack surface
 
 ---
 
-🔮 Future Enhancements
-Sliding window implementation
-Redis-backed distributed limiter
-Sharded bucket map to reduce lock contention
-Benchmark suite
-Dockerfile
-Kubernetes deployment example
+## 🔮 Future Enhancements
 
+Planned roadmap (ordered roughly by impact):
 
-git add README.md
-git commit -m "add professional project documentation"
-git push
+- **Second algorithm:** Sliding Window limiter (compare behavior vs token bucket under bursty traffic)
+- **Concurrency scaling:** Sharded bucket map / lock striping to reduce contention under high parallelism
+- **Distributed mode:** Redis-backed limiter backend (multi-instance coordination + consistent enforcement)
+- **Kubernetes example:** Helm/Kustomize + Deployment/Service + Prometheus scrape annotations
+- **Hardening:** TTL eviction for inactive keys, max-key guardrails, structured logging, request IDs
 
 ---
 
