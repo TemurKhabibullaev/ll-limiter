@@ -146,7 +146,6 @@ curl -i "$BASE/metrics" | head -n 20
 
 ### Build image
 
-```bash
 docker build -t ll-limiter:local .
 
 Run Container
