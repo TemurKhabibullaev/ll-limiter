@@ -59,7 +59,6 @@ func main() {
 	m := metrics.New()
 	srv := httpapi.Server{L: L, M: m}
 
-
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/allow", srv.HandleAllow)
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("ok")) })
