@@ -61,9 +61,9 @@ Single-process, in-memory architecture optimized for simplicity and low latency.
 | key       | Yes      | —        |
 | cost      | No       | 1        |
 
-**Example:**
+Example:
 
-```bash
+bash
 curl "http://127.0.0.1:8080/v1/allow?key=user1&cost=1"
 
 Response:
@@ -107,7 +107,7 @@ RATE_PER_SEC=100 BURST=200 make run
 
 ## Sliding Window example (10 requests per 1 second window):
 
-```bash
+bash
 ALGORITHM=sliding_window WINDOW_MS=1000 BURST=10 make run
 
 ALGORITHM=sliding_window RATE_PER_SEC=10 BURST=10 make run
