@@ -157,7 +157,7 @@ Sliding Window:
 
 ---
 
-🧠 Design Principles
+## 🧠 Design Principles
 * O(1) decision per request
 * Lock-protected token bucket
 * Lazy expiration for unused keys
@@ -167,7 +167,7 @@ Sliding Window:
 
 ---
 
-📊 Observability
+## 📊 Observability
 Example metrics:
 
 ll_limiter_requests_total
@@ -181,7 +181,7 @@ Designed to be scrape-ready in real monitoring systems.
 
 ---
 
-🧪 Local Development
+## 🧪 Local Development
 Start server:
 
 make run
