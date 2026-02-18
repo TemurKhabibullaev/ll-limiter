@@ -4,32 +4,46 @@
 ![Go Version](https://img.shields.io/badge/go-1.24-blue)
 ![Docker](https://img.shields.io/badge/docker-ready-blue)
 
-Low-latency token bucket rate limiter service written in Go.
+Low-latency rate limiter service written in Go.
 
-Built as a production systems imitation and SRE-focused lab project to explore:
+Supports multiple algorithms (Token Bucket and Sliding Window)
+with runtime selection via environment configuration.
+
+Built as a production-systems lab project focused on:
 
 - Concurrency design
+- Algorithm trade-offs
 - Low-latency HTTP services
 - Observability and metrics
-- Production-style API behavior
+- CI/CD & production-style delivery
 
 ---
 
 ## 🚀 Features
 
-- Token Bucket rate limiting
+- Multiple algorithms:
+  - Token Bucket
+  - Sliding Window
+- Runtime algorithm selection (env-based)
 - Per-key isolation
 - HTTP API
 - Health endpoint (`/healthz`)
 - Prometheus metrics (`/metrics`)
-- Environment-based configuration
+- Zero allocations in hot path (bench verified)
 - Concurrency-safe implementation
+- Benchmarks included
+- GitHub Actions CI pipeline
+- Dockerized production image (distroless, non-root)
 
 ---
 
 ## 📐 Architecture Overview
+Algorithm selection occurs at startup:
 
-Client --> HTTP API (net/http) --> Token Bucket (in-memory) --> Decision (Allowed / Rejected) --> Prometheus Metrics
+ALGORITHM=token_bucket (default)
+ALGORITHM=sliding_window
+
+Client --> HTTP API (net/http) --> Selected Limiter (Token Bucket OR Sliding Window) --> Decision --> Prometheus Metrics
 
 
 Single-process, in-memory architecture optimized for simplicity and low latency.
@@ -81,12 +95,11 @@ Environment variables:
 
 | Variable     | Default      | Description                         |
 | ------------ | ------------ | ----------------------------------- |
-| RATE_PER_SEC | 50           | Token refill rate                   |
-| BURST        | 100          | Maximum bucket size / window limit  |
+| RATE_PER_SEC | 50           | Token refill rate / window rate     |
+| BURST        | 100          | Maximum bucket size / window capacity|
 | PORT         | 8080         | HTTP port                           |
-| ALGORITHM    | token_bucket | `token_bucket` or `sliding_window`  |
+| ALGORITHM    | token_bucket | Rate Limiting Algorithm             |
 | WINDOW_MS    | 1000         | Sliding window size in ms (sliding window only) |
-
 
 Example:
 
@@ -96,6 +109,8 @@ RATE_PER_SEC=100 BURST=200 make run
 
 ```bash
 ALGORITHM=sliding_window WINDOW_MS=1000 BURST=10 make run
+
+ALGORITHM=sliding_window RATE_PER_SEC=10 BURST=10 make run
 
 ## 🧮 Algorithms
 
@@ -128,6 +143,17 @@ Response:
 {"allowed":false,"remaining":0,"retry_after_ms":889,"algorithm":"sliding_window"}
 {"allowed":false,"remaining":0,"retry_after_ms":879,"algorithm":"sliding_window"}
 {"allowed":false,"remaining":0,"retry_after_ms":869,"algorithm":"sliding_window"}
+
+---
+## 📈 Benchmarks (Linux amd64)
+
+Token Bucket:
+- ~150 ns/op
+- 0 allocs/op
+
+Sliding Window:
+- ~130–190 ns/op
+- 0 allocs/op
 
 ---
 
