@@ -45,6 +45,22 @@ ALGORITHM=sliding_window
 
 Client --> HTTP API (net/http) --> Selected Limiter (Token Bucket OR Sliding Window) --> Decision --> Prometheus Metrics
 
+DIAGRAM:
+```mermaid
+flowchart LR
+    Client["Client / Caller"] 
+        --> HTTP["HTTP API\n(net/http)"]
+
+    HTTP --> Selector["Runtime Algorithm Selection\n(env-based)"]
+
+    Selector --> TB["Token Bucket"]
+    Selector --> SW["Sliding Window"]
+
+    TB --> Decision["Decision\n(Allowed / Rejected)"]
+    SW --> Decision
+
+    Decision --> Metrics["Prometheus Metrics\n(/metrics)"]
+```
 
 Single-process, in-memory architecture optimized for simplicity and low latency.
 
