@@ -23,6 +23,17 @@ Sliding Window:
 BenchmarkSlidingWindow_Allow_Cost1-2      6439879   189.8 ns/op   0 B/op   0 allocs/op
 BenchmarkSlidingWindow_Allow_ManyKeys-2   8495972   131.3 ns/op   1 B/op   0 allocs/op
 
+Parallel (contention)
+
+go test ./...
+
+These benchmarks simulate concurrent traffic across ~1024 keys using `b.RunParallel`.
+
+BenchmarkTokenBucket_Allow_Parallel-2           12422649                87.87 ns/op            0 B/op          0 allocs/op
+BenchmarkSlidingWindow_Allow_Parallel-2          6948603               169.4 ns/op             1 B/op          0 allocs/op
+
+Token Bucket is faster under parallel load in this build.
+Both algorithms remain allocation-free in the hot path (0 allocs/op).
 -----------------
 NOTES
 * ns/op measures average time per Allow() decision.
