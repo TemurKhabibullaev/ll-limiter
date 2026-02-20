@@ -1,11 +1,11 @@
 package bench
 
 import (
+	"github.com/TemurKhabibullaev/ll-limiter/internal/clock"
+	"github.com/TemurKhabibullaev/ll-limiter/internal/limiter"
 	"strconv"
 	"testing"
 	"time"
-	"github.com/TemurKhabibullaev/ll-limiter/internal/clock"
-	"github.com/TemurKhabibullaev/ll-limiter/internal/limiter"
 )
 
 func BenchmarkTokenBucket_Allow_Parallel(b *testing.B) {
