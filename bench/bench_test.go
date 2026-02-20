@@ -4,10 +4,51 @@ import (
 	"strconv"
 	"testing"
 	"time"
-
 	"github.com/TemurKhabibullaev/ll-limiter/internal/clock"
 	"github.com/TemurKhabibullaev/ll-limiter/internal/limiter"
 )
+
+func BenchmarkTokenBucket_Allow_Parallel(b *testing.B) {
+	tb := limiter.NewTokenBucket(clock.RealClock{}, 50, 100, 10*time.Minute)
+
+	// Precompute keys to avoid allocations in the benchmark itself
+	keys := make([]string, 1024)
+	for i := range keys {
+		keys[i] = "key-" + strconv.Itoa(i)
+	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	b.RunParallel(func(pb *testing.PB) {
+		i := 0
+		for pb.Next() {
+			_ = tb.Allow(keys[i&1023], 1)
+			i++
+		}
+	})
+}
+
+func BenchmarkSlidingWindow_Allow_Parallel(b *testing.B) {
+	sw := limiter.NewSlidingWindow(time.Now, 100, 1*time.Second)
+
+	// Precompute keys to avoid allocations in the benchmark itself
+	keys := make([]string, 1024)
+	for i := range keys {
+		keys[i] = "key-" + strconv.Itoa(i)
+	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	b.RunParallel(func(pb *testing.PB) {
+		i := 0
+		for pb.Next() {
+			_ = sw.Allow(keys[i&1023], 1)
+			i++
+		}
+	})
+}
 
 func BenchmarkTokenBucket_Allow_Cost1(b *testing.B) {
 	tb := limiter.NewTokenBucket(clock.RealClock{}, 50, 100, 10*time.Minute)

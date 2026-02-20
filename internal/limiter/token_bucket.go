@@ -1,11 +1,9 @@
 package limiter
 
 import (
-	"math"
-	"sync"
-	"time"
-
 	"github.com/TemurKhabibullaev/ll-limiter/internal/clock"
+	"math"
+	"time"
 )
 
 type bucket struct {
@@ -14,11 +12,10 @@ type bucket struct {
 }
 
 type TokenBucket struct {
-	mu    sync.Mutex
 	clk   clock.Clock
 	rate  float64
 	burst float64
-	state map[string]*bucket
+	state shardedMap[*bucket]
 	ttl   time.Duration
 }
 
@@ -27,7 +24,7 @@ func NewTokenBucket(clk clock.Clock, ratePerSec float64, burst int64, ttl time.D
 		clk:   clk,
 		rate:  ratePerSec,
 		burst: float64(burst),
-		state: make(map[string]*bucket),
+		state: newShardedMap[*bucket](128),
 		ttl:   ttl,
 	}
 }
@@ -37,14 +34,14 @@ func (tb *TokenBucket) Allow(key string, cost int64) Decision {
 		cost = 1
 	}
 	now := tb.clk.Now()
+	sh := tb.state.shardFor(key)
+	sh.mu.Lock()
+	defer sh.mu.Unlock()
 
-	tb.mu.Lock()
-	defer tb.mu.Unlock()
-
-	b := tb.state[key]
+	b := sh.m[key]
 	if b == nil {
 		b = &bucket{tokens: tb.burst, last: now}
-		tb.state[key] = b
+		sh.m[key] = b
 	}
 
 	elapsed := now.Sub(b.last).Seconds()
